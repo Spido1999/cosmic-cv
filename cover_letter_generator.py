@@ -11,6 +11,7 @@ from typing import Any
 from config import (
     DEEPSEEK_BASE_URL,
     OPENAI_BASE_URL,
+    NVIDIA_BASE_URL,
     OPENAI_MODEL,
 )
 
@@ -33,13 +34,19 @@ def _make_client(provider: str = "DeepSeek", model: str | None = None) -> tuple[
     if provider == "OpenAI":
         api_key  = _live_secret("OPENAI_API_KEY")
         if not api_key:
-            raise RuntimeError("OPENAI_API_KEY not found in secrets. Add it in Streamlit Cloud → Settings → Secrets.")
+            raise RuntimeError("OPENAI_API_KEY not found in secrets.")
         client   = openai.OpenAI(api_key=api_key, base_url=OPENAI_BASE_URL)
         resolved = model or _live_secret("OPENAI_MODEL", "gpt-4o")
+    elif provider == "NVIDIA":
+        api_key  = _live_secret("NVIDIA_API_KEY")
+        if not api_key:
+            raise RuntimeError("NVIDIA_API_KEY not found in secrets. Add it in Streamlit Cloud → Settings → Secrets.")
+        client   = openai.OpenAI(api_key=api_key, base_url=NVIDIA_BASE_URL)
+        resolved = model or "nvidia/nemotron-3-ultra-550b-a55b"
     else:
         api_key  = _live_secret("DEEPSEEK_API_KEY")
         if not api_key:
-            raise RuntimeError("DEEPSEEK_API_KEY not found in secrets. Add it in Streamlit Cloud → Settings → Secrets.")
+            raise RuntimeError("DEEPSEEK_API_KEY not found in secrets.")
         client   = openai.OpenAI(
             api_key=api_key,
             base_url=DEEPSEEK_BASE_URL,

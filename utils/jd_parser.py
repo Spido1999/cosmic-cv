@@ -17,7 +17,7 @@ import json
 import httpx
 import openai
 from typing import Any
-from config import DEEPSEEK_BASE_URL, OPENAI_BASE_URL
+from config import DEEPSEEK_BASE_URL, OPENAI_BASE_URL, NVIDIA_BASE_URL
 
 
 JD_SYSTEM_PROMPT = """You are an expert ATS (Applicant Tracking System) analyst and HR specialist.
@@ -66,6 +66,7 @@ def _make_client() -> tuple[openai.OpenAI, str]:
     """Return (client, model) using whichever provider key is available."""
     deepseek_key = _live_secret("DEEPSEEK_API_KEY")
     openai_key   = _live_secret("OPENAI_API_KEY")
+    nvidia_key   = _live_secret("NVIDIA_API_KEY")
     if deepseek_key:
         model  = _live_secret("DEEPSEEK_MODEL", "deepseek-chat")
         client = openai.OpenAI(
@@ -73,11 +74,14 @@ def _make_client() -> tuple[openai.OpenAI, str]:
             base_url=DEEPSEEK_BASE_URL,
             http_client=httpx.Client(verify=False),
         )
+    elif nvidia_key:
+        model  = "nvidia/nemotron-3-ultra-550b-a55b"
+        client = openai.OpenAI(api_key=nvidia_key, base_url=NVIDIA_BASE_URL)
     elif openai_key:
         model  = _live_secret("OPENAI_MODEL", "gpt-4o-mini")
         client = openai.OpenAI(api_key=openai_key, base_url=OPENAI_BASE_URL)
     else:
-        raise RuntimeError("No API key found. Add DEEPSEEK_API_KEY or OPENAI_API_KEY in Streamlit secrets.")
+        raise RuntimeError("No API key found. Add DEEPSEEK_API_KEY, OPENAI_API_KEY, or NVIDIA_API_KEY in Streamlit secrets.")
     return client, model
 
 

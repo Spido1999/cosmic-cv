@@ -20,9 +20,8 @@ def _get_secret(key: str, fallback: str = "") -> str:
 
 # ── Provider base URLs only — keys are read LIVE at call-time via _live_secret ─
 DEEPSEEK_BASE_URL = "https://api.deepseek.com"
-
-# ── OpenAI config ────────────────────────────────────────────────────────────
 OPENAI_BASE_URL   = "https://api.openai.com/v1"
+NVIDIA_BASE_URL   = "https://integrate.api.nvidia.com/v1"
 
 # ── Legacy alias — model name only, NOT a secret ─────────────────────────────
 OPENAI_MODEL      = _get_secret("DEEPSEEK_MODEL", "deepseek-v4-pro")  # model name only, no secret
@@ -36,6 +35,10 @@ DEEPSEEK_MODELS = [
 ]
 
 OPENAI_MODELS = [
+    # ── GPT-5.6 family (Latest · Aug 2026) ──
+    "gpt-5.6-sol",
+    "gpt-5.6-terra",
+    "gpt-5.6-luna",
     # ── GPT-4.1 family (Apr 2025) ──
     "gpt-4.1",
     "gpt-4.1-mini",
@@ -55,9 +58,39 @@ OPENAI_MODELS = [
     "gpt-3.5-turbo",
 ]
 
+NVIDIA_MODELS = [
+    # ── NVIDIA Nemotron (Flagship) ──
+    "nvidia/nemotron-3-ultra-550b-a55b",
+    "nvidia/nemotron-3.5-lightning-30b-a3b",
+    "nvidia/nemotron-3-nano-omni-30b-a3b-reasoning",
+    # ── Meta Llama via NVIDIA NIM ──
+    "meta/llama-3.3-70b-instruct",
+    "meta/llama-3.1-405b-instruct",
+    "meta/llama-3.1-70b-instruct",
+    "meta/llama-3.1-8b-instruct",
+    # ── Mistral / Mixtral ──
+    "mistralai/mixtral-8x22b-instruct-v0.1",
+    "mistralai/mistral-large-2-instruct",
+    "mistralai/mistral-7b-instruct-v0.3",
+    # ── Qwen ──
+    "qwen/qwen2.5-72b-instruct",
+    "qwen/qwen2.5-coder-32b-instruct",
+    # ── Google Gemma ──
+    "google/gemma-3-27b-it",
+    "google/gemma-3n-e4b-it",
+    # ── DeepSeek via NVIDIA NIM ──
+    "deepseek-ai/deepseek-r1",
+    "deepseek-ai/deepseek-r1-0528",
+    # ── Z.ai GLM ──
+    "z-ai/glm-5.2",
+    # ── Poolside ──
+    "poolside/laguna-xs-2.1",
+]
+
 PROVIDER_MODELS = {
     "DeepSeek": DEEPSEEK_MODELS,
     "OpenAI":   OPENAI_MODELS,
+    "NVIDIA":   NVIDIA_MODELS,
 }
 
 # ── Paths ───────────────────────────────────────────────────────────────────

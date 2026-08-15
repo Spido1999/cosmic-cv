@@ -689,7 +689,7 @@ def render_sidebar():
             help="Select the model for the chosen provider.",
         )
         # Show a subtle info badge
-        provider_color = "#00c8ff" if ai_provider == "DeepSeek" else "#10a37f"
+        provider_color = "#00c8ff" if ai_provider == "DeepSeek" else "#76b900" if ai_provider == "NVIDIA" else "#10a37f"
         st.markdown(
             f'<div style="background:rgba(4,10,30,0.7);border:1px solid {provider_color}33;'
             f'border-radius:8px;padding:6px 10px;font-size:0.72rem;color:{provider_color};'
