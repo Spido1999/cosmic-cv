@@ -477,15 +477,12 @@ st.markdown('<meta name="viewport" content="width=device-width,initial-scale=1,m
 # ===========================================================================
 # 3. CACHED GENERATORS
 # ===========================================================================
-@st.cache_resource
 def get_jd_parser():
     from utils.jd_parser import JDParser; return JDParser()
 
-@st.cache_resource
 def get_resume_generator(provider: str = "DeepSeek", model: str = "deepseek-v4-pro"):
     from resume_generator import ResumeGenerator; return ResumeGenerator(provider, model)
 
-@st.cache_resource
 def get_cover_letter_generator(provider: str = "DeepSeek", model: str = "deepseek-v4-pro"):
     from cover_letter_generator import CoverLetterGenerator; return CoverLetterGenerator(provider, model)
 
