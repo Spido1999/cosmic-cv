@@ -9,24 +9,43 @@ import openai
 from typing import Any
 
 from config import (
-    DEEPSEEK_API_KEY, DEEPSEEK_BASE_URL,
-    OPENAI_API_KEY, OPENAI_BASE_URL,
+    DEEPSEEK_BASE_URL,
+    OPENAI_BASE_URL,
     OPENAI_MODEL,
 )
+
+
+def _live_secret(key: str, fallback: str = "") -> str:
+    """Read from Streamlit secrets first, then env vars."""
+    try:
+        import streamlit as st
+        val = st.secrets.get(key, None)
+        if val:
+            return val
+    except Exception:
+        pass
+    import os
+    return os.getenv(key, fallback)
 
 
 def _make_client(provider: str = "DeepSeek", model: str | None = None) -> tuple["openai.OpenAI", str]:
     """Return (client, resolved_model) for the chosen provider."""
     if provider == "OpenAI":
-        client   = openai.OpenAI(api_key=OPENAI_API_KEY, base_url=OPENAI_BASE_URL)
-        resolved = model or "gpt-4o"
+        api_key  = _live_secret("OPENAI_API_KEY")
+        if not api_key:
+            raise RuntimeError("OPENAI_API_KEY not found in secrets. Add it in Streamlit Cloud → Settings → Secrets.")
+        client   = openai.OpenAI(api_key=api_key, base_url=OPENAI_BASE_URL)
+        resolved = model or _live_secret("OPENAI_MODEL", "gpt-4o")
     else:
+        api_key  = _live_secret("DEEPSEEK_API_KEY")
+        if not api_key:
+            raise RuntimeError("DEEPSEEK_API_KEY not found in secrets. Add it in Streamlit Cloud → Settings → Secrets.")
         client   = openai.OpenAI(
-            api_key=DEEPSEEK_API_KEY,
+            api_key=api_key,
             base_url=DEEPSEEK_BASE_URL,
             http_client=httpx.Client(verify=False),
         )
-        resolved = model or OPENAI_MODEL
+        resolved = model or _live_secret("DEEPSEEK_MODEL", OPENAI_MODEL)
     return client, resolved
 
 

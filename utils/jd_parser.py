@@ -11,12 +11,13 @@ Parses a raw Job Description and extracts:
   - Action verbs used in JD (mirror them in resume)
 """
 
+import os
 import re
 import json
 import httpx
 import openai
 from typing import Any
-from config import OPENAI_API_KEY, OPENAI_MODEL, DEEPSEEK_BASE_URL
+from config import DEEPSEEK_BASE_URL, OPENAI_BASE_URL
 
 
 JD_SYSTEM_PROMPT = """You are an expert ATS (Applicant Tracking System) analyst and HR specialist.
@@ -49,13 +50,35 @@ Return ONLY a valid JSON object with this exact schema (no markdown, no explanat
 }"""
 
 
-def _make_client() -> openai.OpenAI:
-    """Create OpenAI-compatible client pointing at DeepSeek, SSL-bypass for corporate proxies."""
-    return openai.OpenAI(
-        api_key=OPENAI_API_KEY,
-        base_url=DEEPSEEK_BASE_URL,
-        http_client=httpx.Client(verify=False),
-    )
+def _live_secret(key: str, fallback: str = "") -> str:
+    """Read from Streamlit secrets first, then env vars."""
+    try:
+        import streamlit as st
+        val = st.secrets.get(key, None)
+        if val:
+            return val
+    except Exception:
+        pass
+    return os.getenv(key, fallback)
+
+
+def _make_client() -> tuple[openai.OpenAI, str]:
+    """Return (client, model) using whichever provider key is available."""
+    deepseek_key = _live_secret("DEEPSEEK_API_KEY")
+    openai_key   = _live_secret("OPENAI_API_KEY")
+    if deepseek_key:
+        model  = _live_secret("DEEPSEEK_MODEL", "deepseek-chat")
+        client = openai.OpenAI(
+            api_key=deepseek_key,
+            base_url=DEEPSEEK_BASE_URL,
+            http_client=httpx.Client(verify=False),
+        )
+    elif openai_key:
+        model  = _live_secret("OPENAI_MODEL", "gpt-4o-mini")
+        client = openai.OpenAI(api_key=openai_key, base_url=OPENAI_BASE_URL)
+    else:
+        raise RuntimeError("No API key found. Add DEEPSEEK_API_KEY or OPENAI_API_KEY in Streamlit secrets.")
+    return client, model
 
 
 # ─── Parser Class ────────────────────────────────────────────────────────────
@@ -63,18 +86,18 @@ class JDParser:
     """Extracts structured ATS intelligence from a raw Job Description."""
 
     def __init__(self):
-        self.client = _make_client()
-        self.model  = OPENAI_MODEL
+        self.client, self.model = _make_client()
 
     def parse(self, jd_text: str) -> dict[str, Any]:
         """Parse JD and return structured dict."""
         if not jd_text.strip():
             raise ValueError("Job Description cannot be empty.")
 
+        extra = {"extra_body": {"reasoning_effort": "low"}} if DEEPSEEK_BASE_URL in str(self.client.base_url) else {}
         response = self.client.chat.completions.create(
             model=self.model,
             temperature=0.0,
-            extra_body={"reasoning_effort": "low"},
+            **extra,
             messages=[
                 {"role": "system", "content": JD_SYSTEM_PROMPT},
                 {"role": "user",   "content": f"Job Description:\n\n{jd_text}"},

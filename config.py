@@ -18,16 +18,13 @@ def _get_secret(key: str, fallback: str = "") -> str:
         pass
     return os.getenv(key, fallback)
 
-# ── DeepSeek config ─────────────────────────────────────────────────────────
-DEEPSEEK_API_KEY  = _get_secret("DEEPSEEK_API_KEY", "")
+# ── Provider base URLs only — keys are read LIVE at call-time via _live_secret ─
 DEEPSEEK_BASE_URL = "https://api.deepseek.com"
 
 # ── OpenAI config ────────────────────────────────────────────────────────────
-OPENAI_API_KEY    = _get_secret("OPENAI_API_KEY", "")
 OPENAI_BASE_URL   = "https://api.openai.com/v1"
 
-# ── Legacy aliases (kept for backward compatibility) ─────────────────────────
-# These point to DeepSeek by default (original behaviour)
+# ── Legacy alias — model name only, NOT a secret ─────────────────────────────
 OPENAI_MODEL      = _get_secret("DEEPSEEK_MODEL", "deepseek-v4-pro")  # model name only, no secret
 
 # ── Model catalogs per provider ──────────────────────────────────────────────
