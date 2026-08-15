@@ -850,11 +850,13 @@ def main():
             compiler=get_latex_compiler()
             resume_tex=compiler.render_resume(resume_data)
             ts=datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
-            safe_name=re.sub(r"\W+","_",full_name.strip())
-            res_file=f"Resume_{safe_name}_{ts}"
+            safe_name=re.sub(r"\W+","_",full_name.strip()).strip("_")
+            safe_company=re.sub(r"\W+","_",jd_co.strip()).strip("_") if jd_co and jd_co.lower() not in ("","company","unknown") else ""
+            name_part=f"{safe_name}_{safe_company}" if safe_company else safe_name
+            res_file=f"Resume_{name_part}_{ts}"
             res_pdf=compiler.compile_to_pdf(resume_tex,res_file,resume_data=resume_data)
 
-            cl_tex,cl_pdf,cl_file="",{},f"CoverLetter_{safe_name}_{ts}"
+            cl_tex,cl_pdf,cl_file="",{},f"CoverLetter_{name_part}_{ts}"
             if cover_letter_data:
                 cl_tex=compiler.render_cover_letter(cover_letter_data,
                     {"full_name":full_name,"email":email,"phone":phone,"location":location,"linkedin":linkedin,"github":github},jd_co)
