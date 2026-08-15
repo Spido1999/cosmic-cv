@@ -697,7 +697,7 @@ def render_sidebar():
             unsafe_allow_html=True,
         )
 
-        target_score   =st.slider("Target ATS Score",      min_value=70,max_value=100,value=ATS_TARGET_SCORE, help="AI iterates until this score is reached.")
+        target_score   =st.slider("Target ATS Score",      min_value=70,max_value=100,value=ATS_TARGET_SCORE, help="Controls keyword density & writing style. 70-79 = natural/human. 80-89 = balanced. 90-100 = aggressive ATS saturation.")
         max_iterations =st.slider("Max Improvement Rounds",min_value=1, max_value=6,  value=2, help="2 = best speed/score balance.")
 
         st.divider()
