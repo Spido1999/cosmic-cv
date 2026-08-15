@@ -586,15 +586,45 @@ def _extract_text_from_file(uploaded_file):
 @st.cache_data(show_spinner=False)
 def _parse_resume_text(resume_text):
     import httpx, openai
-    from config import DEEPSEEK_API_KEY, DEEPSEEK_BASE_URL, OPENAI_MODEL
-    client=openai.OpenAI(api_key=DEEPSEEK_API_KEY, base_url=DEEPSEEK_BASE_URL, http_client=httpx.Client(verify=False))
-    system='Extract info from resume. Return ONLY JSON: {"full_name":"","email":"","phone":"","location":"","linkedin":"","github":""}. No markdown.'
-    r=client.chat.completions.create(model=OPENAI_MODEL, temperature=0,
-        messages=[{"role":"system","content":system},{"role":"user","content":resume_text[:4000]}])
-    raw=re.sub(r"^```(?:json)?\s*","",r.choices[0].message.content.strip())
-    raw=re.sub(r"\s*```$","",raw)
-    try:    return json.loads(raw)
-    except: return {}
+
+    # ── Read keys at call-time (works on Streamlit Cloud secrets + local .env) ──
+    def _live_secret(key, fallback=""):
+        try:
+            return st.secrets.get(key, os.getenv(key, fallback))
+        except Exception:
+            return os.getenv(key, fallback)
+
+    deepseek_key = _live_secret("DEEPSEEK_API_KEY")
+    openai_key   = _live_secret("OPENAI_API_KEY")
+
+    # Prefer DeepSeek for extraction; fall back to OpenAI if DeepSeek key missing
+    if deepseek_key:
+        from config import DEEPSEEK_BASE_URL, OPENAI_MODEL
+        client = openai.OpenAI(
+            api_key=deepseek_key,
+            base_url=DEEPSEEK_BASE_URL,
+            http_client=httpx.Client(verify=False),
+        )
+        model = OPENAI_MODEL or "deepseek-chat"
+    elif openai_key:
+        client = openai.OpenAI(api_key=openai_key)
+        model  = "gpt-4o-mini"
+    else:
+        st.error("⚠️ No API key found. Add DEEPSEEK_API_KEY or OPENAI_API_KEY in Streamlit Cloud → Settings → Secrets.")
+        return {}
+
+    system = 'Extract info from resume. Return ONLY JSON: {"full_name":"","email":"","phone":"","location":"","linkedin":"","github":""}. No markdown.'
+    try:
+        r = client.chat.completions.create(
+            model=model, temperature=0,
+            messages=[{"role":"system","content":system},
+                      {"role":"user","content":resume_text[:4000]}])
+        raw = re.sub(r"^```(?:json)?\s*","",r.choices[0].message.content.strip())
+        raw = re.sub(r"\s*```$","",raw)
+        return json.loads(raw)
+    except Exception as e:
+        st.error(f"Resume parsing error: {e}")
+        return {}
 
 
 # ===========================================================================

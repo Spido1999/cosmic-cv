@@ -11,9 +11,12 @@ def _get_secret(key: str, fallback: str = "") -> str:
     """Try Streamlit secrets first (cloud deploy), then env vars, then fallback."""
     try:
         import streamlit as st
-        return st.secrets.get(key, os.getenv(key, fallback))
+        val = st.secrets.get(key, None)
+        if val:
+            return val
     except Exception:
-        return os.getenv(key, fallback)
+        pass
+    return os.getenv(key, fallback)
 
 # ── DeepSeek config ─────────────────────────────────────────────────────────
 DEEPSEEK_API_KEY  = _get_secret("DEEPSEEK_API_KEY", "")
