@@ -1,0 +1,65 @@
+% ============================================================
+% ATS-OPTIMISED COVER LETTER TEMPLATE
+% ============================================================
+
+\documentclass[11pt, letterpaper]{article}
+
+\usepackage[
+  top=1in, bottom=1in,
+  left=1in, right=1in
+]{geometry}
+\usepackage{helvet}
+\renewcommand{\familydefault}{\sfdefault}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{hyperref}
+\usepackage{parskip}
+\usepackage{microtype}
+\usepackage{xcolor}
+\definecolor{headingcolor}{RGB}{0,51,102}
+
+\hypersetup{colorlinks=true, urlcolor=headingcolor}
+
+\pagestyle{empty}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{10pt}
+
+\begin{document}
+
+% ── Sender Info ───────────────────────────────────────────────
+{\bfseries\large\color{headingcolor} {{ full_name }} }\\
+{{ location }}\ $\cdot$\ \href{mailto:{{ email }}}{ {{ email }} }\ $\cdot$\ {{ phone }}
+{% if linkedin %}\\ \href{ {{- linkedin -}} }{ {{- linkedin -}} }{% endif %}
+
+\vspace{6pt}
+\today
+
+\vspace{10pt}
+
+% ── Recipient ─────────────────────────────────────────────────
+Hiring Team\\
+{{ company_name }}
+
+\vspace{10pt}
+
+% ── Subject ───────────────────────────────────────────────────
+\textbf{Re: {{ subject_line }} }
+
+\vspace{6pt}
+
+% ── Body ──────────────────────────────────────────────────────
+{{ salutation }}
+
+{{ opening_paragraph }}
+
+{{ body_paragraph_1 }}
+
+{{ body_paragraph_2 }}
+
+{{ body_paragraph_3 }}
+
+{{ closing_paragraph }}
+
+{{ sign_off }}
+
+\end{document}

@@ -1,0 +1,181 @@
+% ============================================================
+% ATS-OPTIMISED RESUME TEMPLATE
+% ============================================================
+% Design Principles:
+%   - Single column layout (ATS parses left to right)
+%   - No tables, no columns, no text boxes
+%   - Standard section headings ATS expects
+%   - Clean fonts (Helvetica/Arial family)
+%   - No headers/footers (ATS often ignores them)
+%   - Hyperlinks in standard format
+% ============================================================
+
+\documentclass[10pt, letterpaper]{article}
+
+% ── Packages ─────────────────────────────────────────────────
+\usepackage[
+  top=0.6in, bottom=0.6in,
+  left=0.7in, right=0.7in
+]{geometry}
+\usepackage{helvet}            % Helvetica (Arial equivalent) — ATS-safe
+\renewcommand{\familydefault}{\sfdefault}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{hyperref}
+\usepackage{enumitem}
+\usepackage{titlesec}
+\usepackage{xcolor}
+\usepackage{parskip}
+\usepackage{microtype}
+
+% ── Colours ──────────────────────────────────────────────────
+\definecolor{headingcolor}{RGB}{0,51,102}    % Dark navy — professional
+\definecolor{rulecolor}{RGB}{0,51,102}
+
+% ── Hyperlink style ──────────────────────────────────────────
+\hypersetup{
+  colorlinks=true,
+  urlcolor=headingcolor,
+  linkcolor=headingcolor,
+}
+
+% ── Section formatting ────────────────────────────────────────
+% Standard headings that ALL ATS systems recognise
+\titleformat{\section}
+  {\large\bfseries\color{headingcolor}}
+  {}
+  {0pt}
+  {}
+  [\vspace{-4pt}\color{rulecolor}\rule{\linewidth}{1pt}\vspace{2pt}]
+
+\titlespacing*{\section}{0pt}{10pt}{4pt}
+
+% ── List settings ─────────────────────────────────────────────
+\setlist[itemize]{
+  leftmargin=*,
+  label=\textbullet,
+  topsep=1pt,
+  itemsep=1pt,
+  parsep=0pt,
+}
+
+% ── Custom commands ───────────────────────────────────────────
+
+% Experience entry: Title | Company | Location | Dates
+\newcommand{\expentry}[4]{%
+  \noindent
+  \textbf{#1} \hfill \textbf{#3}\\
+  \textit{#2} \hfill \textit{#4}
+  \vspace{2pt}
+}
+
+% Education entry
+\newcommand{\eduentry}[5]{%
+  \noindent
+  \textbf{#1 in #2} \hfill \textbf{#4}\\
+  \textit{#3}%
+  \ifx\relax#5\relax\else\ $\cdot$ GPA: #5\fi
+  \vspace{2pt}
+}
+
+% Certification entry
+\newcommand{\certentry}[3]{%
+  \noindent
+  \textbf{#1} $\cdot$ #2 \hfill #3\\
+}
+
+% ── No page numbers (ATS doesn't need them) ───────────────────
+\pagestyle{empty}
+
+% ── Spacing ───────────────────────────────────────────────────
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{3pt}
+
+% ============================================================
+%  DOCUMENT START
+% ============================================================
+\begin{document}
+
+% ── HEADER ───────────────────────────────────────────────────
+% Name centred and large — ATS reads the top of the resume first
+{\centering
+  {\LARGE\bfseries\color{headingcolor} {{ full_name }} }\\[4pt]
+  {{ location }} $\cdot$
+  \href{mailto:{{ email }}}{ {{ email }} } $\cdot$
+  {{ phone }}
+  {% if linkedin %} $\cdot$ \href{ {{- linkedin -}} }{LinkedIn}{% endif %}
+  {% if github %} $\cdot$ \href{ {{- github -}} }{GitHub}{% endif %}
+\par}
+
+\vspace{6pt}
+
+% ── PROFESSIONAL SUMMARY ──────────────────────────────────────
+\section{Summary}
+{{ summary }}
+
+% ── SKILLS ────────────────────────────────────────────────────
+\section{Skills}
+\textbf{Technical Skills:} {{ skills.technical_skills | join(', ') }}\\
+\textbf{Tools \& Technologies:} {{ skills.tools_technologies | join(', ') }}\\
+\textbf{Soft Skills:} {{ skills.soft_skills | join(', ') }}
+
+% ── EXPERIENCE ────────────────────────────────────────────────
+\section{Experience}
+
+{% for job in experience %}
+\expentry{ {{- job.title -}} }{ {{- job.company -}} }{ {{- job.location -}} }{ {{- job.start_date -}} -- {{- job.end_date -}} }
+\begin{itemize}
+{% for bullet in job.bullets %}
+  \item {{ bullet }}
+{% endfor %}
+\end{itemize}
+\vspace{4pt}
+{% endfor %}
+
+% ── EDUCATION ────────────────────────────────────────────────
+\section{Education}
+
+{% for edu in education %}
+\eduentry{ {{- edu.degree -}} }{ {{- edu.field -}} }{ {{- edu.institution -}} }{ {{- edu.graduation_year -}} }{ {{- edu.gpa | default('') -}} }
+{% if edu.relevant_coursework and edu.relevant_coursework | length > 0 %}
+\textbf{Relevant Coursework:} {{ edu.relevant_coursework | join(', ') }}
+{% endif %}
+\vspace{4pt}
+{% endfor %}
+
+% ── CERTIFICATIONS ────────────────────────────────────────────
+{% if certifications and certifications | length > 0 %}
+\section{Certifications}
+{% for cert in certifications %}
+\certentry{ {{- cert.name -}} }{ {{- cert.issuer -}} }{ {{- cert.year -}} }
+{% endfor %}
+{% endif %}
+
+% ── PROJECTS ─────────────────────────────────────────────────
+{% if projects and projects | length > 0 %}
+\section{Projects}
+{% for project in projects %}
+\noindent\textbf{ {{- project.name -}} } $\cdot$ \textit{ {{- project.technologies | join(', ') -}} }\\
+{{ project.description }}
+{% if project.impact %}\ $\rightarrow$ \textbf{Impact:} {{ project.impact }}{% endif %}
+\vspace{4pt}
+{% endfor %}
+{% endif %}
+
+% ── AWARDS ───────────────────────────────────────────────────
+{% if awards and awards | length > 0 %}
+\section{Awards \& Recognition}
+\begin{itemize}
+{% for award in awards %}
+  \item {{ award }}
+{% endfor %}
+\end{itemize}
+{% endif %}
+
+% ── LANGUAGES ────────────────────────────────────────────────
+{% if languages and languages | length > 0 %}
+\section{Languages}
+{{ languages | join(' $\cdot$ ') }}
+{% endif %}
+
+\end{document}
